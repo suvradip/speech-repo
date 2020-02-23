@@ -1,8 +1,14 @@
+require('dotenv').config();
+
+const PORT = process.env.PORT || 3000;
 module.exports = {
    mode: 'universal',
    /*
     ** Headers of the page
     */
+   server: {
+      port: PORT,
+   },
    head: {
       title: process.env.npm_package_name || '',
       meta: [

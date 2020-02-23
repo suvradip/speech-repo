@@ -166,11 +166,13 @@
 import { mapState } from 'vuex';
 export default {
    async fetch({ store, query, error }) {
-      const { id } = query;
+      const { id = '' } = query;
       try {
-         await store.dispatch('FETCH_SPEECHES', {
-            slug: id,
-         });
+         if (id !== '') {
+            await store.dispatch('FETCH_SPEECHES', {
+               slug: id,
+            });
+         }
       } catch (e) {
          //  error({ statusCode: 404 });
       }
@@ -216,7 +218,7 @@ export default {
          this.form.keyWords = this.speech.keyWords;
          this.form.date = this.speech.date;
       } else {
-         this.$router.replace('/create');
+         this.$router.push({ query: {} });
       }
    },
 

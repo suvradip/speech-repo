@@ -3,11 +3,12 @@ const express = require('express');
 const consola = require('consola');
 const { Nuxt, Builder } = require('nuxt');
 const bodyParser = require('body-parser');
+const logger = require('morgan');
 const app = express();
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js');
 const apiRouter = require('./api');
-
+app.use(logger('dev'));
 app.use(bodyParser.json());
 
 // parse: requested data in application/x-www-form-urlencoded
@@ -20,7 +21,7 @@ async function start() {
    // Init Nuxt.js
    const nuxt = new Nuxt(config);
 
-   const PORT = process.env.PORT || nuxt.options.server.port || 3000;
+   const PORT = process.env.PORT || 3000;
 
    await nuxt.ready();
    // Build only in dev mode
