@@ -1,9 +1,5 @@
 const Sequelize = require('sequelize');
 const signale = require('signale');
-// const { Op } = Sequelize;
-// const operatorsAliases = {
-//    $gt: Op.gt,
-// };
 
 const sequelize = new Sequelize(
    process.env.DATABASE_NAME,
@@ -12,7 +8,7 @@ const sequelize = new Sequelize(
    {
       host: process.env.DATABASE_HOST,
       dialect: 'mysql',
-      // operatorsAliases,
+
       dialectOptions: {
          decimalNumbers: true,
       },

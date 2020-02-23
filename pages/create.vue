@@ -14,6 +14,7 @@
                               { 'is-invalid': attemptSubmit && isEmpty(form.title) },
                               { 'is-valid': attemptSubmit && !isEmpty(form.title) },
                            ]"
+                           autocomplete="off"
                            placeholder="Title of this speech"
                         />
                         <div class="invalid-feedback">
@@ -60,6 +61,7 @@
                                        { 'is-invalid': attemptSubmit && isEmpty(form.author) },
                                        { 'is-valid': attemptSubmit && !isEmpty(form.author) },
                                     ]"
+                                    autocomplete="off"
                                  />
                                  <div class="invalid-feedback">
                                     who are you?
@@ -94,7 +96,18 @@
                                     type="text"
                                     class="form-control"
                                     placeholder="DD/MM/YYYY"
+                                    autocomplete="off"
+                                    :class="[
+                                       { 'is-invalid': attemptSubmit && !isEmpty(form.date) && !validateDate },
+                                       { 'is-valid': attemptSubmit && !isEmpty(form.date) && validateDate },
+                                    ]"
                                  />
+                                 <div class="invalid-feedback">
+                                    Try use DD/MM/YYYY format.
+                                 </div>
+                                 <div class="valid-feedback">
+                                    Awessom!
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -104,12 +117,15 @@
 
                   <div class="card-footer text-muted">
                      <div class="text-right">
-                        <button type="button" class="btn discard btn-primary btn-sm">
-                           Discard
-                        </button>
-                        <button type="submit" class="btn save btn-secondary btn-sm">
-                           save
-                        </button>
+                        <div>
+                           <button type="button" class="btn discard btn-primary btn-sm" @click="deleteIt">
+                              Discard
+                           </button>
+                           <button type="submit" class="btn save btn-secondary btn-sm">
+                              save
+                           </button>
+                        </div>
+                        <p class="led" v-text="formFeed" />
                      </div>
                   </div>
                </div>
@@ -118,15 +134,21 @@
             <div class="secondary col-2">
                <ul class="list-group">
                   <li class="list-group-item">
-                     <a type="button" class="btn preview btn-sm btn-outline-dark">
+                     <button class="btn preview btn-sm btn-outline-dark" @click.prevent="openPreview">
                         Preview
-                     </a>
-                  </li>
-                  <li class="list-group-item">
-                     <button type="button" class="btn share btn-primary btn-sm">
-                        share
                      </button>
+                     <div v-if="showPreviewError" class="led error-feedback">
+                        Please save this current draft before previewing.
+                     </div>
                   </li>
+                  <!-- <li class="list-group-item">
+                     <a
+                        :href="`mailto:?subject=${form.title}&body=${form.content}`"
+                        class="btn share btn-primary btn-sm"
+                     >
+                        share
+                     </a>
+                  </li> -->
                </ul>
             </div>
          </div>
@@ -141,21 +163,62 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
-   data: () => ({
-      postMsg: false,
-      attemptSubmit: false,
-      form: {
-         title: 'My demo',
-         content: 'Good contents',
-         author: 'Suvradip Saha',
-         keyWords: 'hello, world',
-         date: '11/10/2091',
-      },
-      action: '/speech',
-   }),
+   async fetch({ store, query, error }) {
+      const { id } = query;
+      try {
+         await store.dispatch('FETCH_SPEECHES', {
+            slug: id,
+         });
+      } catch (e) {
+         //  error({ statusCode: 404 });
+      }
+   },
 
-   computed: {},
+   data() {
+      // console.log(this.speech.title);
+      return {
+         postMsg: false,
+         attemptSubmit: false,
+         form: {
+            title: '',
+            content: '',
+            author: '',
+            keyWords: '',
+            date: '',
+            id: '',
+         },
+         action: '/speech',
+         showPreviewError: false,
+         formFeed: '',
+      };
+   },
+
+   computed: {
+      ...mapState({
+         speech: state => state.speeches,
+      }),
+
+      validateDate() {
+         const regx = new RegExp(/^(0?[1-9]|[12][0-9]|3[01])[/](0?[1-9]|1[012])[/]\d{4}$/);
+         return regx.test(this.form.date);
+      },
+   },
+
+   mounted() {
+      const { id = '' } = this.$route.query;
+      if (id !== '' && typeof this.speech !== 'undefined' && typeof this.speech === 'object') {
+         this.form.id = id;
+         this.form.title = this.speech.title || '';
+         this.form.content = this.speech.content;
+         this.form.author = this.speech.author;
+         this.form.keyWords = this.speech.keyWords;
+         this.form.date = this.speech.date;
+      } else {
+         this.$router.replace('/create');
+      }
+   },
 
    methods: {
       isEmpty(field) {
@@ -169,16 +232,45 @@ export default {
          if (this.isEmpty(this.form.title)) return false;
          if (this.isEmpty(this.form.author)) return false;
          if (this.isEmpty(this.form.content)) return false;
-         //  if (this.isEmpty(this.form.keyWords)) return false;
-         //  if (this.isEmpty(this.form.date)) return false;
+         //  if (!this.isEmpty(this.form.date) && this.validateDate) return false;
 
-         console.log('Great');
          this.$service
             .postDb(this.action, this.form)
             .then(response => {
                if (response.status === 200) {
                   console.log('content received');
-                  this.postMsg = true;
+                  // this.postMsg = true;
+                  this.form.id = response.data.id;
+                  this.formFeed = 'Data saved successfully.';
+                  setTimeout(() => {
+                     this.formFeed = '';
+                  }, 3000);
+               }
+            })
+            .catch(err => console.error('fail', err));
+      },
+
+      openPreview() {
+         if (this.form.id === '') {
+            this.showPreviewError = true;
+            setTimeout(() => {
+               this.showPreviewError = false;
+            }, 3000);
+         } else {
+            this.$router.push(`/preview/${this.form.id}`);
+         }
+      },
+
+      deleteIt() {
+         this.$service
+            .deleteDb(`${this.action}/${this.form.id}`)
+            .then(response => {
+               if (response.status === 200) {
+                  this.$router.push('/');
+               }
+
+               if (response.status !== 200) {
+                  console.warn('unable to delete it.');
                }
             })
             .catch(err => console.error('fail', err));
@@ -199,29 +291,18 @@ export default {
             font-weight: 500;
          }
       }
-
-      .btn {
-         border: none;
-         &.discard {
-            background: $colorOne;
-         }
-         &.save {
-            background: $colorTwo;
-         }
-      }
    }
 
    .secondary {
-      .btn {
-         &.share {
-            border: none;
-            background: $secondaryColor;
-            padding: 10px 20px;
-         }
-      }
       ul li {
          border: 0;
       }
+   }
+
+   .error-feedback {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #ff0000;
    }
 }
 </style>

@@ -8,4 +8,5 @@ const instanceDB = axios.create({
 
 Vue.prototype.$service = {
    postDb: (endPoint, payload = {}) => instanceDB.post(endPoint, payload),
+   deleteDb: (endPoint, payload = {}) => instanceDB.delete(endPoint),
 };
