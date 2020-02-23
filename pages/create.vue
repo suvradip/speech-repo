@@ -125,7 +125,7 @@
                               save
                            </button>
                         </div>
-                        <p class="led" v-text="formFeed" />
+                        <p class="formFeed led" v-text="formFeed" />
                      </div>
                   </div>
                </div>
@@ -134,9 +134,14 @@
             <div class="secondary col-2">
                <ul class="list-group">
                   <li class="list-group-item">
-                     <button class="btn preview btn-sm btn-outline-dark" @click.prevent="openPreview">
+                     <a
+                        class="btn preview btn-sm btn-outline-dark"
+                        :href="form.id ? `/preview/${form.id}` : '#'"
+                        target="_blank"
+                        @click="openPreview"
+                     >
                         Preview
-                     </button>
+                     </a>
                      <div v-if="showPreviewError" class="led error-feedback">
                         Please save this current draft before previewing.
                      </div>
@@ -247,6 +252,7 @@ export default {
                   this.formFeed = 'Data saved successfully.';
                   setTimeout(() => {
                      this.formFeed = '';
+                     this.attemptSubmit = false;
                   }, 3000);
                }
             })
@@ -306,6 +312,13 @@ export default {
       margin-top: 10px;
       font-size: 13px;
       color: #ff0000;
+   }
+
+   .formFeed {
+      color: #f18867;
+      font-size: 13px;
+      font-style: italic;
+      margin: 10px 15px;
    }
 }
 </style>

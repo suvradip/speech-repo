@@ -10,7 +10,7 @@
             </div>
 
             <div class="speech">
-               <div v-html="speech.content" />
+               <pre class="preview-contents" v-text="speech.content" />
             </div>
          </div>
          <div class="col-1">
@@ -55,6 +55,15 @@ export default {
    }
    .edit {
       padding: 8px 25px;
+   }
+   .preview-contents {
+      background-color: #fff;
+      font-family: 'Roboto';
+      padding: 0;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      font-size: 15px;
+      font-weight: 400;
    }
 }
 </style>
