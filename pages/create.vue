@@ -213,9 +213,10 @@ export default {
       if (id !== '' && typeof this.speech !== 'undefined' && typeof this.speech === 'object') {
          this.form.id = id;
          this.form.title = this.speech.title || '';
-         this.form.content = this.speech.content;
-         this.form.author = this.speech.author;
-         this.form.keyWords = this.speech.keyWords;
+         this.form.content = this.speech.content || '';
+         this.form.author = this.speech.author || '';
+         this.form.keyWords = this.speech.keyWords || '';
+         //  const d = new Date(this.speech.date);
          this.form.date = this.speech.date;
       } else {
          this.$router.push({ query: {} });
@@ -236,8 +237,8 @@ export default {
          if (this.isEmpty(this.form.content)) return false;
          //  if (!this.isEmpty(this.form.date) && this.validateDate) return false;
 
-         this.$service
-            .postDb(this.action, this.form)
+         this.$axios
+            .post(this.action, this.form)
             .then(response => {
                if (response.status === 200) {
                   console.log('content received');
@@ -264,8 +265,8 @@ export default {
       },
 
       deleteIt() {
-         this.$service
-            .deleteDb(`${this.action}/${this.form.id}`)
+         this.$axios
+            .delete(`${this.action}/${this.form.id}`)
             .then(response => {
                if (response.status === 200) {
                   this.$router.push('/');

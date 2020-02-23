@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const signale = require('signale');
 const Sequelize = require('sequelize');
+const format = require('date-fns/format');
 const fcDbo = require('../config/sequelize');
 
 const speechModel = fcDbo.import('../models/speech.js');
@@ -51,7 +52,12 @@ router.get('/speeches/:id', async (req, res) => {
       });
 
       if (sqlResponse) {
-         return res.json(sqlResponse);
+         const data = {
+            ...sqlResponse.get({ plain: true }),
+            date: format(new Date(sqlResponse.date), 'dd/MM/yyyy'),
+         };
+
+         return res.json(data);
       }
       return res.status(400).json({
          error: 'No data records',

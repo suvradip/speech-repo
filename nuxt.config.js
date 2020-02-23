@@ -39,11 +39,7 @@ module.exports = {
    /*
     ** Plugins to load before mounting the App
     */
-   plugins: [
-      {
-         src: '~plugins/service.js',
-      },
-   ],
+   plugins: [],
    /*
     ** Nuxt.js dev-modules
     */
@@ -67,7 +63,10 @@ module.exports = {
     ** Axios module configuration
     ** See https://axios.nuxtjs.org/options
     */
-   axios: {},
+   axios: {
+      browserBaseURL: `/api/`,
+      baseURL: `http://localhost:${PORT}/api/`,
+   },
    /*
     ** Build configuration
     */
